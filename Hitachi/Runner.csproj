@@ -47,7 +47,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Scenario\Model.csproj">
+    <ProjectReference Include="..\Model\Model.csproj">
       <Project>{A8C40E16-0F60-4678-9B6F-23BA98329276}</Project>
       <Name>Model</Name>
     </ProjectReference>

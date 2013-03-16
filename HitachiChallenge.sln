@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C# Express 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Runner", "Hitachi\Runner.csproj", "{4376A14F-D6A2-4A75-8E86-5FFAF2667221}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model", "Scenario\Model.csproj", "{A8C40E16-0F60-4678-9B6F-23BA98329276}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model", "Model\Model.csproj", "{A8C40E16-0F60-4678-9B6F-23BA98329276}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model.NUnit", "Scenario.NUnit\Model.NUnit.csproj", "{7463362E-BA75-4B40-890A-396E35AD48E4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model.NUnit", "Model.NUnit\Model.NUnit.csproj", "{7463362E-BA75-4B40-890A-396E35AD48E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
