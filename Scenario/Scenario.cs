@@ -226,8 +226,19 @@ namespace Hitachi
         public int GetRoutes(Port start, Port end, int maxStops)
         {
             CalculateJourneys(start, end);
-
             return m_ValidJourneys.Where(m => m.Stops() <= maxStops).Count() ;
+        }
+
+        public object GetExactRoutes(Port start, Port end, int totalStops)
+        {
+            CalculateJourneys(start, end);
+            return m_ValidJourneys.Where(m => m.Stops() == totalStops).Count();
+        }
+
+        public object GetRoutesByDuration(Port start, Port end, int duration)
+        {
+            CalculateJourneys(start, end);
+            return m_ValidJourneys.Where(m => m.Duration <= duration).Count();
         }
     }
 

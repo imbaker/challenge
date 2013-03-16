@@ -84,5 +84,21 @@ namespace Hitachi.NUnit
             var count = scenario.GetRoutes(Port.Liverpool, Port.Liverpool, maxStops);
             Assert.AreEqual(2, count);
         }
+
+        [Test]
+        public void Find_Number_Of_Routes_Buenos_Liverpool_Where_Stops_Is_4()
+        {
+            const int totalStops = 4;
+            var count = scenario.GetExactRoutes(Port.BuenosAires, Port.Liverpool, totalStops);
+            Assert.AreEqual(0, count);
+        }
+
+        [Test]
+        public void Find_Number_Of_Routes_Liverpool_Liverpool_Where_Duration_LE_25()
+        {
+            const int duration = 25;
+            var count = scenario.GetRoutesByDuration(Port.Liverpool, Port.Liverpool, duration);
+            Assert.AreEqual(2, count);
+        }
     }
 }
