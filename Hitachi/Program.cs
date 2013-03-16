@@ -13,13 +13,14 @@ namespace Runner
         {
             var scenario = new Hitachi.Model();
             Console.WriteLine(scenario.ListValidRoutes());
-            Port[] ports = { Port.BuenosAires, Port.NewYork, Port.Liverpool };
-            var distance = scenario.Route(ports);
-            var duration = scenario.ShortestJourney(Port.BuenosAires, Port.NewYork);
+            List<Port> ports = new List<Port>() { Port.BuenosAires, Port.NewYork, Port.Liverpool };
+            var distance = scenario.TotalJourneyTime(ports);
+            var duration = scenario.CalculateShortestJourney(Port.BuenosAires, Port.NewYork);
             Console.WriteLine("Duration: {0}", duration);
-            duration = scenario.ShortestJourney(Port.BuenosAires, Port.Liverpool);
+            duration = scenario.CalculateShortestJourney(Port.BuenosAires, Port.Liverpool);
             Console.WriteLine("Duration: {0}", duration);
-            duration = scenario.ShortestJourney(Port.NewYork, Port.NewYork);
+            duration = scenario.CalculateShortestJourney(Port.NewYork, Port.NewYork);
+            scenario.PrintJourneyDetails();
             Console.WriteLine("Duration: {0}", duration);
             Console.ReadLine();
         }

@@ -47,9 +47,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Scenario\Scenario.csproj">
+    <ProjectReference Include="..\Scenario\Model.csproj">
       <Project>{A8C40E16-0F60-4678-9B6F-23BA98329276}</Project>
-      <Name>Scenario</Name>
+      <Name>Model</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
