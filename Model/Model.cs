@@ -32,14 +32,6 @@ namespace Hitachi
         /// </summary>
         private Journey m_currentJourney = new Journey();
 
-        #region Constructors
-
-        public Model()
-        {
-        }
-
-        #endregion
-
         #region Public Methods
 
         /// <summary>
@@ -61,9 +53,13 @@ namespace Hitachi
             m_validPorts.Add(route.End);
         }
 
-        public IList<Route> ListValidRoutes()
+        /// <summary>
+        /// Returns a count of the number of routes in the Model's network
+        /// </summary>
+        /// <returns>An integer indicating the number of routes</returns>
+        public int CountValidRoutes()
         {
-            return m_validRoutes;
+            return m_validRoutes.Count();
         }
 
         /// <summary>
@@ -160,6 +156,9 @@ namespace Hitachi
             return m_validJourneys.Where(m => m.Duration <= duration).Count();
         }
 
+        /// <summary>
+        /// Utility method to print out the current contents of m_validJourneys
+        /// </summary>
         public void PrintJourneyDetails()
         {
             foreach (Journey current in m_validJourneys)
@@ -172,15 +171,13 @@ namespace Hitachi
         #endregion
 
         #region Private Methods
-        private bool ValidatePorts(IList<string> ports)
+        private void ValidatePorts(IList<string> ports)
         {
             foreach (string port in ports)
             {
                 if (!m_validPorts.Contains(port))
                     throw new ArgumentOutOfRangeException("ports", port, "Invalid port");
             }
-
-            return true;
         }
 
         private void CalculateValidJourneys(string start, string end)

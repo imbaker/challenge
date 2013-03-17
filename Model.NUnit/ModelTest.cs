@@ -48,8 +48,7 @@ namespace Hitachi.NUnit
         [Test]
         public void ListValidRoutes_ReturnsNine()
         {
-            var routeCount = model.ListValidRoutes().Count;
-            Assert.AreEqual(9, routeCount);
+            Assert.AreEqual(9, model.CountValidRoutes());
         }
 
         [Test]

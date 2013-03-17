@@ -27,7 +27,7 @@ namespace Runner
             model.AddValidRoute(new Route() { Start = Casablanca, End = Liverpool, Duration = 3 });
             model.AddValidRoute(new Route() { Start = Casablanca, End = CapeTown, Duration = 6 });
             model.AddValidRoute(new Route() { Start = CapeTown, End = NewYork, Duration = 8 });
-            Console.WriteLine(model.ListValidRoutes());
+            Console.WriteLine(model.CountValidRoutes());
             Console.ReadLine();
         }
     }
