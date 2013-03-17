@@ -9,19 +9,25 @@ namespace Runner
 {
     class Program
     {
+        private const string BuenosAires = "Buenos Aires";
+        private const string Casablanca = "Casablanca";
+        private const string CapeTown = "Cape Town";
+        private const string Liverpool = "Liverpool";
+        private const string NewYork = "New York";
+
         static void Main(string[] args)
         {
-            var scenario = new Hitachi.Model();
-            Console.WriteLine(scenario.ListValidRoutes());
-            List<Port> ports = new List<Port>() { Port.BuenosAires, Port.NewYork, Port.Liverpool };
-            var distance = scenario.TotalJourneyTime(ports);
-            var duration = scenario.CalculateShortestJourney(Port.BuenosAires, Port.NewYork);
-            Console.WriteLine("Duration: {0}", duration);
-            duration = scenario.CalculateShortestJourney(Port.BuenosAires, Port.Liverpool);
-            Console.WriteLine("Duration: {0}", duration);
-            duration = scenario.CalculateShortestJourney(Port.NewYork, Port.NewYork);
-            scenario.PrintJourneyDetails();
-            Console.WriteLine("Duration: {0}", duration);
+            Model model = new Model();
+            model.AddValidRoute(new Route() { Start = BuenosAires, End = NewYork, Duration = 6 });
+            model.AddValidRoute(new Route() { Start = BuenosAires, End = Casablanca, Duration = 5 });
+            model.AddValidRoute(new Route() { Start = BuenosAires, End = CapeTown, Duration = 4 });
+            model.AddValidRoute(new Route() { Start = NewYork, End = Liverpool, Duration = 4 });
+            model.AddValidRoute(new Route() { Start = Liverpool, End = Casablanca, Duration = 3 });
+            model.AddValidRoute(new Route() { Start = Liverpool, End = CapeTown, Duration = 6 });
+            model.AddValidRoute(new Route() { Start = Casablanca, End = Liverpool, Duration = 3 });
+            model.AddValidRoute(new Route() { Start = Casablanca, End = CapeTown, Duration = 6 });
+            model.AddValidRoute(new Route() { Start = CapeTown, End = NewYork, Duration = 8 });
+            Console.WriteLine(model.ListValidRoutes());
             Console.ReadLine();
         }
     }

@@ -13,9 +13,14 @@ namespace Hitachi
         private IList<Route> m_validRoutes = new List<Route>();
 
         /// <summary>
+        /// Used to store a list of all valid ports in the network.
+        /// </summary>
+        private HashSet<string> m_validPorts = new HashSet<string>();
+
+        /// <summary>
         /// Used to store which ports have been stopped at in the current journey
         /// </summary>
-        private IList<Port> m_stopsMade = new List<Port>();
+        private IList<string> m_stopsMade = new List<string>();
 
         /// <summary>
         /// Used to store a list of all valid journeys for the current Start and End ports.
@@ -31,20 +36,30 @@ namespace Hitachi
 
         public Model()
         {
-            m_validRoutes.Add(new Route() { Start = Port.BuenosAires, End = Port.NewYork, Duration = 6 });
-            m_validRoutes.Add(new Route() { Start = Port.BuenosAires, End = Port.Casablanca, Duration = 5 });
-            m_validRoutes.Add(new Route() { Start = Port.BuenosAires, End = Port.CapeTown, Duration = 4 });
-            m_validRoutes.Add(new Route() { Start = Port.NewYork, End = Port.Liverpool, Duration = 4 });
-            m_validRoutes.Add(new Route() { Start = Port.Liverpool, End = Port.Casablanca, Duration = 3 });
-            m_validRoutes.Add(new Route() { Start = Port.Liverpool, End = Port.CapeTown, Duration = 6 });
-            m_validRoutes.Add(new Route() { Start = Port.Casablanca, End = Port.Liverpool, Duration = 3 });
-            m_validRoutes.Add(new Route() { Start = Port.Casablanca, End = Port.CapeTown, Duration = 6 });
-            m_validRoutes.Add(new Route() { Start = Port.CapeTown, End = Port.NewYork, Duration = 8 });
         }
 
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// Adds a new route to the Model's network
+        /// </summary>
+        /// <param name="route">A Route object containing a valid route</param>
+        public void AddValidRoute(Route route)
+        {
+            if (route.Start == route.End)
+                throw new ArgumentException("Route Start and End cannot be the same.");
+
+            if (route.Duration <= 0)
+                throw new ArgumentException("Route Duration must be greater than zero.");
+
+            if (!m_validRoutes.Contains(route))
+                m_validRoutes.Add(route);
+
+            m_validPorts.Add(route.Start);
+            m_validPorts.Add(route.End);
+        }
 
         public IList<Route> ListValidRoutes()
         {
@@ -56,9 +71,12 @@ namespace Hitachi
         /// </summary>
         /// <param name="ports">A List containing the ports to be visited</param>
         /// <returns>An integer representing the total journey time</returns>
+        /// <exception cref="ArgumentOutOfRangeException">If one of the ports passed in does not exist in the current network</exception>
         /// <exception cref="ArgumentException">If no valid route exists between two ports specified then an ArgumentException is thrown</exception>
-        public int TotalJourneyTime(List<Port> ports)
+        public int TotalJourneyTime(List<string> ports)
         {
+            ValidatePorts(ports);
+
             var duration = 0;
             for (int i = 0; i < ports.Count()-1; i++)
             {
@@ -70,9 +88,9 @@ namespace Hitachi
                     Route currentRoute = m_validRoutes.Where(s => s.Start == start).Where(e => e.End == end).Single();
                     duration += currentRoute.Duration;
                 }
-                catch (InvalidOperationException e)
+                catch (InvalidOperationException) 
                 {
-                    throw new ArgumentException("Invalid route: " + start + " to " + end + " is not a valid route");
+                    throw new ArgumentException("Invalid route: " + start + " to " + end + " is not a valid route.");
                 }
             }
 
@@ -85,8 +103,10 @@ namespace Hitachi
         /// <param name="start">The Port the journey starts from</param>
         /// <param name="end">The Port the journey finishes at</param>
         /// <returns>An integer representing the shortest journey duration (in days)</returns>
-        public int CalculateShortestJourney(Port start, Port end)
+        public int CalculateShortestJourney(string start, string end)
         {
+            ValidatePorts(new List<string>() { start, end });
+
             CalculateValidJourneys(start, end);
             
             return m_validJourneys.Min(p => p.Duration);
@@ -99,8 +119,13 @@ namespace Hitachi
         /// <param name="end">The Port the journey finishes at</param>
         /// <param name="maxStops">An integer indicating the maximum number of stops allowed</param>
         /// <returns>An integer indicating the number of journeys that have maxStops or fewer stops</returns>
-        public int GetJourneysWithMaxStops(Port start, Port end, int maxStops)
+        public int GetJourneysWithMaxStops(string start, string end, int maxStops)
         {
+            ValidatePorts(new List<string>() { start, end });
+
+            if (maxStops <= 0)
+                throw new ArgumentOutOfRangeException("maxStops", maxStops, "Value must be greater than zero.");
+
             CalculateValidJourneys(start, end);
             return m_validJourneys.Where(m => m.Stops() <= maxStops).Count();
         }
@@ -112,8 +137,10 @@ namespace Hitachi
         /// <param name="end">The Port the journey finishes at</param>
         /// <param name="totalStops">An integer indicating the number of stops allowed</param>
         /// <returns>An integer indicating the number of journeys that have precisely totalStops</returns>
-        public object GetJourneysWithExactStops(Port start, Port end, int totalStops)
+        public object GetJourneysWithExactStops(string start, string end, int totalStops)
         {
+            ValidatePorts(new List<string>() { start, end });
+
             CalculateValidJourneys(start, end);
             return m_validJourneys.Where(m => m.Stops() == totalStops).Count();
         }
@@ -125,8 +152,10 @@ namespace Hitachi
         /// <param name="end">The Port the journey finishes at</param>
         /// <param name="duration">An integer indicating the maximum duration allowed</param>
         /// <returns>An integer indicating the number of journeys that are within the specified duration</returns>
-        public object GetJourneysWithinDuration(Port start, Port end, int duration)
+        public object GetJourneysWithinDuration(string start, string end, int duration)
         {
+            ValidatePorts(new List<string>() { start, end });
+
             CalculateValidJourneys(start, end);
             return m_validJourneys.Where(m => m.Duration <= duration).Count();
         }
@@ -143,7 +172,18 @@ namespace Hitachi
         #endregion
 
         #region Private Methods
-        private void CalculateValidJourneys(Port start, Port end)
+        private bool ValidatePorts(IList<string> ports)
+        {
+            foreach (string port in ports)
+            {
+                if (!m_validPorts.Contains(port))
+                    throw new ArgumentOutOfRangeException("ports", port, "Invalid port");
+            }
+
+            return true;
+        }
+
+        private void CalculateValidJourneys(string start, string end)
         {
             m_validJourneys.Clear();
 
@@ -186,7 +226,7 @@ namespace Hitachi
             }
         }
 
-        private int CalculateSubJourneys(Port start, Port end)
+        private int CalculateSubJourneys(string start, string end)
         {
             int currentTotalDuration = 0;
 
@@ -254,24 +294,12 @@ namespace Hitachi
     }
     
     /// <summary>
-    /// Stores valid port names
-    /// </summary>
-    public enum Port
-    {
-        BuenosAires = 1,
-        CapeTown = 2,
-        Casablanca = 3,
-        Liverpool = 4,
-        NewYork = 5
-    }
-
-    /// <summary>
     /// Represents a portion of a journey, that has a defined start port and end port.
     /// </summary>
     public class Route
     {
-        public Port Start {get; set; }
-        public Port End { get; set; }
+        public string Start {get; set; }
+        public string End { get; set; }
         public int Duration { get; set; }
     }
 
