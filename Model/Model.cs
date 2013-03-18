@@ -1,36 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-
-namespace Hitachi
+﻿namespace Hitachi
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    
     public class Model
     {
         /// <summary>
         /// Used to store a list of all valid routes in the network.
         /// </summary>
-        private IList<Route> m_validRoutes = new List<Route>();
+        private IList<Route> validRoutes = new List<Route>();
 
         /// <summary>
         /// Used to store a list of all valid ports in the network.
         /// </summary>
-        private HashSet<string> m_validPorts = new HashSet<string>();
+        private HashSet<string> validPorts = new HashSet<string>();
 
         /// <summary>
         /// Used to store which ports have been stopped at in the current journey
         /// </summary>
-        private IList<string> m_stopsMade = new List<string>();
+        private IList<string> stopsMade = new List<string>();
 
         /// <summary>
         /// Used to store a list of all valid journeys for the current Start and End ports.
         /// </summary>
-        private IList<Journey> m_validJourneys = new List<Journey>();
+        private IList<Journey> validJourneys = new List<Journey>();
 
         /// <summary>
         /// Used to store the route of the current journey.
         /// </summary>
-        private Journey m_currentJourney = new Journey();
+        private Journey currentJourney = new Journey();
 
         #region Public Methods
 
@@ -46,11 +45,11 @@ namespace Hitachi
             if (route.Duration <= 0)
                 throw new ArgumentException("Route Duration must be greater than zero.");
 
-            if (!m_validRoutes.Contains(route))
-                m_validRoutes.Add(route);
+            if (!this.validRoutes.Contains(route))
+                this.validRoutes.Add(route);
 
-            m_validPorts.Add(route.Start);
-            m_validPorts.Add(route.End);
+            this.validPorts.Add(route.Start);
+            this.validPorts.Add(route.End);
         }
 
         /// <summary>
@@ -59,7 +58,7 @@ namespace Hitachi
         /// <returns>An integer indicating the number of routes</returns>
         public int CountValidRoutes()
         {
-            return m_validRoutes.Count();
+            return this.validRoutes.Count();
         }
 
         /// <summary>
@@ -71,17 +70,17 @@ namespace Hitachi
         /// <exception cref="ArgumentException">If no valid route exists between two ports specified then an ArgumentException is thrown</exception>
         public int TotalJourneyTime(List<string> ports)
         {
-            ValidatePorts(ports);
+            this.ValidatePorts(ports);
 
             var duration = 0;
-            for (int i = 0; i < ports.Count()-1; i++)
+            for (int i = 0; i < ports.Count() - 1; i++)
             {
                 var start = ports[i];
                 var end = ports[i + 1];
 
                 try
                 {
-                    Route currentRoute = m_validRoutes.Where(s => s.Start == start).Where(e => e.End == end).Single();
+                    Route currentRoute = this.validRoutes.Where(s => s.Start == start).Where(e => e.End == end).Single();
                     duration += currentRoute.Duration;
                 }
                 catch (InvalidOperationException) 
@@ -101,11 +100,11 @@ namespace Hitachi
         /// <returns>An integer representing the shortest journey duration (in days)</returns>
         public int CalculateShortestJourney(string start, string end)
         {
-            ValidatePorts(new List<string>() { start, end });
+            this.ValidatePorts(new List<string>() { start, end });
 
-            CalculateValidJourneys(start, end);
+            this.CalculateValidJourneys(start, end);
             
-            return m_validJourneys.Min(p => p.Duration);
+            return this.validJourneys.Min(p => p.Duration());
         }
 
         /// <summary>
@@ -117,13 +116,13 @@ namespace Hitachi
         /// <returns>An integer indicating the number of journeys that have maxStops or fewer stops</returns>
         public int GetJourneysWithMaxStops(string start, string end, int maxStops)
         {
-            ValidatePorts(new List<string>() { start, end });
+            this.ValidatePorts(new List<string>() { start, end });
 
             if (maxStops <= 0)
                 throw new ArgumentOutOfRangeException("maxStops", maxStops, "Value must be greater than zero.");
 
-            CalculateValidJourneys(start, end);
-            return m_validJourneys.Where(m => m.Stops() <= maxStops).Count();
+            this.CalculateValidJourneys(start, end);
+            return this.validJourneys.Where(m => m.Stops() <= maxStops).Count();
         }
 
         /// <summary>
@@ -133,12 +132,12 @@ namespace Hitachi
         /// <param name="end">The Port the journey finishes at</param>
         /// <param name="totalStops">An integer indicating the number of stops allowed</param>
         /// <returns>An integer indicating the number of journeys that have precisely totalStops</returns>
-        public object GetJourneysWithExactStops(string start, string end, int totalStops)
+        public int GetJourneysWithExactStops(string start, string end, int totalStops)
         {
-            ValidatePorts(new List<string>() { start, end });
+            this.ValidatePorts(new List<string>() { start, end });
 
-            CalculateValidJourneys(start, end);
-            return m_validJourneys.Where(m => m.Stops() == totalStops).Count();
+            this.CalculateValidJourneys(start, end);
+            return this.validJourneys.Where(m => m.Stops() == totalStops).Count();
         }
 
         /// <summary>
@@ -148,23 +147,23 @@ namespace Hitachi
         /// <param name="end">The Port the journey finishes at</param>
         /// <param name="duration">An integer indicating the maximum duration allowed</param>
         /// <returns>An integer indicating the number of journeys that are within the specified duration</returns>
-        public object GetJourneysWithinDuration(string start, string end, int duration)
+        public int GetJourneysWithinDuration(string start, string end, int duration)
         {
-            ValidatePorts(new List<string>() { start, end });
+            this.ValidatePorts(new List<string>() { start, end });
 
-            CalculateValidJourneys(start, end);
-            return m_validJourneys.Where(m => m.Duration <= duration).Count();
+            this.CalculateValidJourneys(start, end);
+            return this.validJourneys.Where(m => m.Duration() <= duration).Count();
         }
 
         /// <summary>
-        /// Utility method to print out the current contents of m_validJourneys
+        /// Utility method to print out the current contents of validJourneys
         /// </summary>
-        public void PrintJourneyDetails()
+        public void WriteJourneyDetails()
         {
-            foreach (Journey current in m_validJourneys)
+            foreach (Journey current in this.validJourneys)
             {
                 Console.WriteLine("Stops: {0}", current.ToString());
-                Console.WriteLine("Count: {0}\tStops: {1}\tDuration: {2}", current.Count(), current.Stops(), current.Duration);
+                Console.WriteLine("Stops: {0}\tDuration: {1}", current.Stops(), current.Duration());
             }
         }
 
@@ -175,28 +174,28 @@ namespace Hitachi
         {
             foreach (string port in ports)
             {
-                if (!m_validPorts.Contains(port))
+                if (!this.validPorts.Contains(port))
                     throw new ArgumentOutOfRangeException("ports", port, "Invalid port");
             }
         }
 
         private void CalculateValidJourneys(string start, string end)
         {
-            m_validJourneys.Clear();
+            this.validJourneys.Clear();
 
             // Only work with routes that start from the starting port
-            foreach (Route currentRoute in m_validRoutes.Where(s => s.Start == start))
+            foreach (Route currentRoute in this.validRoutes.Where(s => s.Start == start))
             {
                 Console.WriteLine("----------------Looking for a new route---------------");
                 int currentTotalDuration = 0;
-                ClearJourneyDetails();
-                m_stopsMade.Clear();
+                this.ClearJourneyDetails();
+                this.stopsMade.Clear();
 
                 Console.WriteLine("Looking for: {0} -> {1}", start, end);
                 Console.WriteLine("Found: {0} -> {1} - {2}", currentRoute.Start, currentRoute.End, currentRoute.Duration);
                 
                 // Store the first destination for subsequent circular references checks.
-                m_stopsMade.Add(currentRoute.End);
+                this.stopsMade.Add(currentRoute.End);
 
                 // If the route we've identified is not a direct route then...
                 if (currentRoute.End != end)
@@ -205,6 +204,7 @@ namespace Hitachi
                     {
                         // ... recurse looking for a journey that starts with the current end point and ends with the original end point
                         currentTotalDuration += this.CalculateSubJourneys(currentRoute.End, end);
+
                         // Add the initial route's duration onto CurrentTotalDuration
                         currentTotalDuration += currentRoute.Duration;
                     }
@@ -219,7 +219,8 @@ namespace Hitachi
                     // ... otherwise store the currentRoute.Duration
                     currentTotalDuration = currentRoute.Duration;
                 }
-                StoreJourneyDetails(currentRoute, currentTotalDuration);
+
+                this.StoreJourneyDetails(currentRoute, currentTotalDuration);
             }
         }
 
@@ -227,14 +228,15 @@ namespace Hitachi
         {
             int currentTotalDuration = 0;
 
-            foreach (Route currentRoute in m_validRoutes.Where(s => s.Start == start))
+            foreach (Route currentRoute in this.validRoutes.Where(s => s.Start == start))
             {
                 Console.WriteLine("Looking for: {0} -> {1}", start, end);
                 Console.WriteLine("Found: {0} -> {1} - {2}", currentRoute.Start, currentRoute.End, currentRoute.Duration);
+
                 // Check that the current destination has not been visited before (to prevent circular references).
-                if (!m_stopsMade.Contains(currentRoute.End))
+                if (!this.stopsMade.Contains(currentRoute.End))
                 {
-                    m_stopsMade.Add(currentRoute.End);
+                    this.stopsMade.Add(currentRoute.End);
                 }
                 else
                 {
@@ -245,7 +247,7 @@ namespace Hitachi
                 if (currentRoute.End == end)
                 {
                     // ... Store this route into the journey, and start to return.
-                    StoreJourneyDetails(currentRoute);
+                    this.StoreJourneyDetails(currentRoute);
                     return currentRoute.Duration;
                 }
                 else
@@ -255,7 +257,7 @@ namespace Hitachi
                         // ... recurse looking for a journey that starts with the current end point and ends with the original end point
                         currentTotalDuration += this.CalculateSubJourneys(currentRoute.End, end);
                         currentTotalDuration += currentRoute.Duration;
-                        StoreJourneyDetails(currentRoute);
+                        this.StoreJourneyDetails(currentRoute);
                         return currentTotalDuration;
                     }
                     catch (InvalidOperationException e)
@@ -272,31 +274,32 @@ namespace Hitachi
 
         private void ClearJourneyDetails()
         {
-            m_currentJourney = new Journey();
+            this.currentJourney = new Journey();
         }
 
         private void StoreJourneyDetails(Route route)
         {
-            m_currentJourney.Add(route);
+            this.currentJourney.Add(route);
         }
 
         private void StoreJourneyDetails(Route route, int duration)
         {
-            m_currentJourney.Add(route);
-            m_currentJourney.Duration = duration;
+            this.currentJourney.Add(route);
 
-            m_validJourneys.Add(m_currentJourney);
+            this.validJourneys.Add(this.currentJourney);
         }
         #endregion
     }
     
     /// <summary>
-    /// Represents a portion of a journey, that has a defined start port and end port.
+    /// Represents a portion of a journey, that has a defined start port and end port and duration.
     /// </summary>
     public class Route
     {
-        public string Start {get; set; }
+        public string Start { get; set; }
+
         public string End { get; set; }
+
         public int Duration { get; set; }
     }
 
@@ -307,42 +310,42 @@ namespace Hitachi
     {
         private IList<Route> routes = new List<Route>();
 
-        public int Duration { get; set; }
+        private int duration = 0;
 
         public void Add(Route route)
         {
-            routes.Add(route);
+            this.routes.Add(route);
+            this.duration += route.Duration;
         }
 
         public void Clear()
         {
-            routes = new List<Route>();
-            Duration = 0;
+            this.routes = new List<Route>();
+            this.duration = 0;
         }
 
-        public int Count()
+        public int Duration()
         {
-            return routes.Count();
+            return this.duration;
         }
 
         public int Stops()
         {
-            return this.Count() - 1;
+            return this.routes.Count();
         }
 
         public override string ToString()
         {
-            string output = "";
+            string output = string.Empty;
+
             // Need to reverse the routes list as they will have been added in backwards due to recursion
-            foreach (Route route in routes.Reverse())
-                if (output == "")
-                {
-                    output += route.Start;
-                    output += " -> ";
-                    output += route.End;
-                }
+            foreach (Route route in this.routes.Reverse())
+            {
+                if (output == string.Empty)
+                    output += route.Start + " -(" + route.Duration + ")-> " + route.End;
                 else
-                    output += (" -> " + route.End);
+                    output += " -(" + route.Duration + ")-> " + route.End;
+            }
 
             return output;
         }
